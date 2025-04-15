@@ -1,0 +1,23 @@
+[project]
+name = "mindmates"
+version = "0.1.0"
+description = "MindMates using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "crewai[tools]>=0.114.0,<1.0.0"
+]
+
+[project.scripts]
+mindmates = "mindmates.main:run"
+run_crew = "mindmates.main:run"
+train = "mindmates.main:train"
+replay = "mindmates.main:replay"
+test = "mindmates.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
