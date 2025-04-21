@@ -8,22 +8,83 @@ from mindmates.crew import Mindmates
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
-# This main file is intended to be a way for you to run your
-# crew locally, so refrain from adding unnecessary logic into this file.
-# Replace with inputs you want to test with, it will automatically
-# interpolate any tasks and agents information
+CALENDAR_PATH="./knowledge/calendar.txt"
+
+def get_user_input():
+    print("(Enter \"End\" to quit the chat) User: ", end="")
+    user_input = input()
+    return user_input
+
+def read_calendar(calendar_path):
+    with open(calendar_path, "r", encoding="utf-8") as f:
+        text = f.read()
+    return text
 
 def run():
     """
     Run the crew.
     """
-    inputs = {
-        'topic': 'AI LLMs',
-        'current_year': str(datetime.now().year)
-    }
+    chat_history = ""
     
     try:
-        Mindmates().crew().kickoff(inputs=inputs)
+        print("Performing check-in ...")
+        # perform check in
+        now = datetime.now()
+        current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+        calendar = read_calendar(CALENDAR_PATH)
+        check_in_inputs = {
+            'current_time': current_time,
+            'chat_history': chat_history,
+            'calendar': calendar
+        }
+        output = Mindmates().checkInCrew().kickoff(inputs=check_in_inputs)
+
+        if output.raw == 'None': # the check-in agent finds it no need to raise questions about past events
+            # the user might want to chat with the bot
+            user_input = get_user_input()
+            while user_input != "End":
+                chat_history += "User: " + user_input + '\n'
+
+                now = datetime.now()
+                current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+                calendar = read_calendar(CALENDAR_PATH)
+                chat_inputs = {
+                    'current_time': current_time,
+                    'chat_history': chat_history,
+                    'calendar': calendar
+                }
+
+                output = Mindmates().chatCrew().kickoff(inputs=chat_inputs).tasks_output[0] # get the chat output
+                print("BOT:", output.raw)
+                chat_history += "Assisstant: " + output.raw + '\n'
+
+                user_input = get_user_input()
+        else:
+            # check-in agent raises a check-in question
+            print("BOT:", output.raw)
+            chat_history += "Assisstant: " + output.raw + '\n'
+
+            # the user responds to the question and starts chatting with the companion chatbot agent
+            user_input = get_user_input()
+            while user_input != "End":
+                chat_history += "User: " + user_input + '\n'
+
+                now = datetime.now()
+                current_time = now.strftime("%Y-%m-%d %H:%M:%S")
+                calendar = read_calendar(CALENDAR_PATH)
+                chat_inputs = {
+                    'current_time': current_time,
+                    'chat_history': chat_history,
+                    'calendar': calendar
+                }
+
+                output = Mindmates().chatCrew().kickoff(inputs=chat_inputs).tasks_output[0] # get the chat output
+                print("BOT:", output.raw)
+                chat_history += "Assisstant: " + output.raw + '\n'
+
+                user_input = get_user_input()
+
+
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
 

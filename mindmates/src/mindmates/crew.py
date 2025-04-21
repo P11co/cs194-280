@@ -1,62 +1,113 @@
-from crewai import Agent, Crew, Process, Task
+from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
+from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
+import json
 
-# If you want to run a snippet of code before or after the crew starts,
-# you can use the @before_kickoff and @after_kickoff decorators
-# https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
+file_path = '/home/vertex_ai_service_account.json' # modify it to the actual path of vertex ai service account credential file
+with open(file_path, 'r') as file:
+    vertex_credentials = json.load(file)
+vertex_credentials_json = json.dumps(vertex_credentials)
+
+VERBOSE = False
 
 @CrewBase
 class Mindmates():
     """Mindmates crew"""
 
-    # Learn more about YAML configuration files here:
-    # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
-    # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
 
-    # If you would like to add tools to your agents, you can learn more about it here:
-    # https://docs.crewai.com/concepts/agents#agent-tools
     @agent
-    def researcher(self) -> Agent:
+    def checkInAgent(self) -> Agent:
         return Agent(
-            config=self.agents_config['researcher'],
-            verbose=True
+            llm=LLM(
+                model="gemini/gemini-2.0-flash",
+                temperature=0.7,
+                vertex_credentials=vertex_credentials_json
+            ),
+            config=self.agents_config['check_in_agent'],
+            verbose=VERBOSE
+        )
+    
+    @agent
+    def companionChatbotAgent(self) -> Agent:
+        return Agent(
+            llm=LLM(
+                model="gemini/gemini-2.0-flash",
+                temperature=0.7,
+                vertex_credentials=vertex_credentials_json
+            ),
+            config=self.agents_config['companion_chatbot_agent'],
+            verbose=VERBOSE,
+        )
+    
+    @agent
+    def contextSummaryAgentPatient(self) -> Agent:
+        return Agent(
+            llm=LLM(
+                model="gemini/gemini-2.0-flash",
+                temperature=0.7,
+                vertex_credentials=vertex_credentials_json
+            ),
+            config=self.agents_config['context_summary_agent_patient'],
+            verbose=VERBOSE
         )
 
     @agent
-    def reporting_analyst(self) -> Agent:
+    def calendarEventsAgent(self) -> Agent:
         return Agent(
-            config=self.agents_config['reporting_analyst'],
-            verbose=True
-        )
-
-    # To learn more about structured task outputs,
-    # task dependencies, and task callbacks, check out the documentation:
-    # https://docs.crewai.com/concepts/tasks#overview-of-a-task
-    @task
-    def research_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['research_task'],
+            llm=LLM(
+                model="gemini/gemini-2.0-flash",
+                temperature=0.7,
+                vertex_credentials=vertex_credentials_json
+            ),
+            config=self.agents_config['calendar_events_agent'],
+            verbose=VERBOSE,
         )
 
     @task
-    def reporting_task(self) -> Task:
+    def checkInTask(self) -> Task:
         return Task(
-            config=self.tasks_config['reporting_task'],
-            output_file='report.md'
+            config=self.tasks_config['check_in_task'],
+        )
+    
+    @task
+    def chatTask(self) -> Task:
+        return Task(
+            config=self.tasks_config['chat_task'],
         )
 
+    @task
+    def contextSummaryPatientTask(self) -> Task:
+        return Task(
+            config=self.tasks_config['context_summary_patient_task'],
+        )
+    
+    @task
+    def calendarEventTask(self) -> Task:
+        return Task(
+            config=self.tasks_config['calendar_event_task'],
+            output_file="./knowledge/calendar.txt",
+        )
+    
     @crew
-    def crew(self) -> Crew:
-        """Creates the Mindmates crew"""
-        # To learn how to add knowledge sources to your crew, check out the documentation:
-        # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
+    def checkInCrew(self) -> Crew:
+        """Creates the check-in crew"""
 
         return Crew(
-            agents=self.agents, # Automatically created by the @agent decorator
-            tasks=self.tasks, # Automatically created by the @task decorator
+            agents=[self.checkInAgent()],
+            tasks=[self.checkInTask()],
             process=Process.sequential,
-            verbose=True,
-            # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
+            verbose=VERBOSE,
+        )
+    
+    @crew
+    def chatCrew(self) -> Crew:
+        """Creates the chat crew"""
+
+        return Crew(
+            agents=[self.companionChatbotAgent(), self.contextSummaryAgentPatient(), self.calendarEventsAgent()],
+            tasks=[self.chatTask(), self.contextSummaryPatientTask(), self.calendarEventTask()],
+            process=Process.sequential,
+            verbose=VERBOSE,
         )
