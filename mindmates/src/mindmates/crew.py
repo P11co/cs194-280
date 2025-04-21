@@ -1,62 +1,84 @@
+# crew.py
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 
-# If you want to run a snippet of code before or after the crew starts,
-# you can use the @before_kickoff and @after_kickoff decorators
-# https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
+# Assuming your filter function is available (e.g., from utils)
+# from mindmates.utils.llm_utils import filter_lifestyle_experts # Example import
 
 @CrewBase
 class Mindmates():
-    """Mindmates crew"""
-
-    # Learn more about YAML configuration files here:
-    # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
-    # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
+    """Mindmates crew factory/definitions"""
     agents_config = 'config/agents.yaml'
-    tasks_config = 'config/tasks.yaml'
+    tasks_config = 'config/tasks.yaml' # You might use this for static task parts
 
-    # If you would like to add tools to your agents, you can learn more about it here:
-    # https://docs.crewai.com/concepts/agents#agent-tools
-    @agent
-    def researcher(self) -> Agent:
-        return Agent(
-            config=self.agents_config['researcher'],
-            verbose=True
-        )
+    # --- Agent Definitions ---
+    # Define ALL potential agents using the @agent decorator
+    # This allows the class to instantiate them when requested.
 
     @agent
-    def reporting_analyst(self) -> Agent:
+    def therapy_agent(self) -> Agent:
         return Agent(
-            config=self.agents_config['reporting_analyst'],
-            verbose=True
-        )
-
-    # To learn more about structured task outputs,
-    # task dependencies, and task callbacks, check out the documentation:
-    # https://docs.crewai.com/concepts/tasks#overview-of-a-task
-    @task
-    def research_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['research_task'],
-        )
-
-    @task
-    def reporting_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['reporting_task'],
-            output_file='report.md'
-        )
-
-    @crew
-    def crew(self) -> Crew:
-        """Creates the Mindmates crew"""
-        # To learn how to add knowledge sources to your crew, check out the documentation:
-        # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
-
-        return Crew(
-            agents=self.agents, # Automatically created by the @agent decorator
-            tasks=self.tasks, # Automatically created by the @task decorator
-            process=Process.sequential,
+            config=self.agents_config['therapy_agent'],
             verbose=True,
-            # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
+            memory=True # Agent-level memory can be enabled here if needed
+        )
+
+    @agent
+    def workstudy_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config['workstudy_agent'],
+            verbose=True
+        )
+
+    @agent
+    def relationship_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config['relationship_agent'],
+            verbose=True
+        )
+
+    @agent
+    def hobby_agent(self) -> Agent: # Corrected name
+        return Agent(
+            config=self.agents_config['hobby_agent'],
+            verbose=True
+        )
+
+    @agent
+    def exercise_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config['exercise_agent'],
+            verbose=True
+        )
+
+    @agent
+    def food_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config['food_agent'],
+            verbose=True
+        )
+
+    # --- Method to get specific agents by name ---
+    # This is useful for dynamically fetching agents in gram.py
+    def get_agent_by_name(self, name: str) -> Agent | None:
+        """Retrieves an instantiated agent by its method name."""
+        if hasattr(self, name):
+            method = getattr(self, name)
+            if callable(method) and hasattr(method, '_is_crew_agent'): # Check if it's decorated
+                 # Call the decorated method to get the Agent instance
+                 # Pass self if the method requires it (which decorated methods do implicitly)
+                return method(self)
+        return None
+
+    # Optional: A method to create a basic crew if ever needed,
+    # but we will create it dynamically in gram.py
+    @crew
+    def base_crew(self) -> Crew:
+        """Creates a base crew - Adjust as needed if you have static tasks"""
+        return Crew(
+            agents=[self.therapy_agent()], # Example: Just the therapy agent
+            tasks=[], # Define base tasks if any
+            process=Process.sequential,
+            memory=True,
+            verbose=True
         )

@@ -5,6 +5,7 @@ import warnings
 from datetime import datetime
 
 from mindmates.crew import Mindmates
+from mindmates.utils.llm_utils import filter_lifestyle_experts
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
