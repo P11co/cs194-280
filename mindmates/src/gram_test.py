@@ -7,6 +7,9 @@ from os import getenv
 from collections import defaultdict
 import json
 import re
+import os 
+
+print("CWD is:", os.getcwd())
 
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv(), override=True)
@@ -17,13 +20,11 @@ from aiogram.enums import ParseMode, ChatAction
 from aiogram.filters import CommandStart
 from aiogram.types import Message, ReactionTypeEmoji
 
-from google import genai # Keep if your filter uses it directly
+from google import genai
 
 # --- CrewAI Imports ---
 from crewai import Agent, Task, Crew, Process
-from mindmates.crew import Mindmates # Import your Crew class definition
-# Assuming your filter function is here or imported correctly
-# from mindmates.utils.llm_utils import filter_lifestyle_experts, call_llm # Example
+from mindmates.crew import Mindmates
 
 # --- Configuration ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', stream=sys.stdout)
@@ -31,13 +32,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 TOKEN = getenv("BOT_TOKEN")
 GEMINI_API_KEY = getenv("GEMINI_API_KEY")
 
-# Initialize Gemini Client (Example - adapt if filter uses a different client/LLM)
+# Initialize Gemini Client
 if not GEMINI_API_KEY:
     logging.error("GEMINI_API_KEY not found.")
     sys.exit("Gemini API Key is required.")
 else:
     try:
-        # This client might be used by your filter function
+        # This client will used by the filter function
         client = genai.Client(api_key=GEMINI_API_KEY)
         logging.info("Gemini configured successfully (for filter or direct calls).")
     except Exception as e:
@@ -47,7 +48,7 @@ else:
 dp = Dispatcher()
 
 # --- Simple In-Memory Chat History ---
-# Warning: This resets on bot restart. Use a database for persistence.
+# Warning: Use a database for persistence.
 chat_histories = defaultdict(list)
 MAX_HISTORY_LEN = 10 # Keep last 10 turns (User + Bot)
 
@@ -64,15 +65,12 @@ def get_formatted_history(chat_id):
     # Simple formatting example:
     return "\n".join([f"{msg['role']}: {msg['content']}" for msg in history])
 
-# --- Placeholder Filter Function (Replace with your actual implementation) ---
+# --- Filter Function ---
 async def filter_lifestyle_experts_async(chat_history: str, user_input: str, expert_list: list) -> list:
     """
-    Placeholder: Determines relevant experts based on input and history.
-    Replace this with your actual LLM call or logic.
     Returns a list of relevant expert TOPICS (e.g., ["work/study", "exercise"]).
     """
     logging.info("Filtering relevant experts...")
-    # Example simple keyword check (replace with LLM call)
     relevant_topics = []
     full_text = chat_history + "\nUser: " + user_input
     if "study" in full_text.lower() or "work" in full_text.lower():
@@ -85,20 +83,6 @@ async def filter_lifestyle_experts_async(chat_history: str, user_input: str, exp
         relevant_topics.append("hobby")
     if "food" in full_text.lower() or "eat" in full_text.lower() or "diet" in full_text.lower() or "nutrition" in full_text.lower():
         relevant_topics.append("food")
-
-    # --- Your actual LLM call would go here ---
-    # prompt = f"""Analyze the following conversation history and the latest user message.
-    # Determine which of these expert topics are relevant: {', '.join(expert_list)}.
-    # Respond ONLY with a comma-separated list of the relevant topics (e.g., work/study, exercise). If none are relevant, respond with 'None'.
-
-    # History:
-    # {chat_history}
-
-    # Latest User Message: {user_input}
-    # """
-    # response_text = await asyncio.to_thread(call_llm, prompt) # Assuming call_llm exists
-    # relevant_topics = [topic.strip() for topic in response_text.split(',') if topic.strip() and topic.strip().lower() != 'none']
-    # --- End LLM call section ---
 
     logging.info(f"Filter result: {relevant_topics}")
     return relevant_topics
@@ -173,14 +157,35 @@ async def handle_crewai_request(message: Message, bot: Bot):
             )
             expert_tasks.append(task)
             
-        from mindmates.utils.models import TherapyOutput # Adjust import path if needed
+        # RAG Context Retrieval
+        from mindmates.utils.embedding_utils import load_vectordb, fetch_rag_context
+        
+        input_query = f"Find me information relevant to {user_input}"
+        VECTOR_DB = load_vectordb()
+        rag_context = fetch_rag_context(input_query, VECTOR_DB, top_n=3)
+        print("RAG Context dump:", rag_context)
+            
+        from mindmates.utils.models import TherapyOutput
 
         synthesis_task = Task(
             description=f"""User Message Context:\n'''\n{formatted_history}\nUser: {user_input}\n'''\n\n
                         Review the user message context and the analyses from expert agents (if any).
-                        1. Synthesize perspectives into a supportive therapeutic text response for the user. Use emojis when appropriate. Try to mirror the way the user talks, so incorporate modern internet slang.
-                        2. Suggest ONE suitable **standard Unicode emoji** reaction from this specific, commonly allowed list: 👍, ❤️, 🔥, 🎉, 🤔, 🙏. If none of these fit well, suggest "None". Avoid custom or animated emojis. If no standard emoji feels appropriate, suggest "None".
+                        1. Synthesize perspectives into a supportive therapeutic text response for the user. Use emojis when appropriate. Try to mirror the way the user talks, so incorporate modern internet slang if the user uses it actively.
+                        2. Suggest ONE suitable **standard Unicode emoji** reaction from this specific, commonly allowed list: 👍, ❤️, 🔥, 🎉, 🤔, 🙏. 
+                        
+                        Here is what each of these emojis means:
+                        👍 Thumbs Up – agreement, approval or simple “got it”
+                        ❤️ Red Heart – warmth, affection, gratitude or strong support
+                        🔥 Fire – something “awesome,” impressive or “on fire”
+                        🎉 Party Popper – celebration, congratulations or festive cheer
+                        🤔 Thinking Face – pondering, curiosity, mild doubt or asking for clarification
+                        🙏 Folded Hands – thanks, please, hope or sincere support
+                        If no standard emoji feels appropriate, suggest "None".
+                        
                         Return ONLY the JSON object matching the expected schema, nothing else.
+                        
+                        Here are some relevant QNA pairs other patients have asked and how practitioners responded to them. Refer to them only if the context is relevant.
+                        {rag_context}
                         """,
             expected_output="A JSON object conforming to the TherapyOutput schema.", # Schema has final_response (str) and suggested_reaction (Optional[str])
             agent=therapy_agent_instance,
@@ -243,10 +248,6 @@ async def handle_crewai_request(message: Message, bot: Bot):
             # Try parsing the extracted string
             if json_string:
                 try:
-                    # Replace potentially incorrect assignments/quotes if needed (more advanced cleaning)
-                    # Example: Replace 'key="value"' with '"key": "value"' - this gets complex quickly
-                    # cleaned_json_string = json_string.replace("=", ":").replace("'", '"') # Oversimplified example!
-
                     output_data = json.loads(json_string) # Use loads() on the string
                     if not isinstance(output_data, dict):
                         logging.warning("Manual JSON parse result was not a dictionary.")

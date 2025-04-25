@@ -6,3 +6,4 @@ venv/
 *.log
 prototype.ipynb
 mental_health_therapy
+my_data/

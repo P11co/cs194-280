@@ -27,6 +27,8 @@ context_summary_agent_patient:
     You excel at condensing information from various sources. You monitor patient interactions
     and logs to create timely and relevant summaries that provide necessary context for other agents
     (like Calendar/Events) and maintain a coherent record in the Diary Log.
+  llm: 
+    gemini/gemini-1.5-flash-8b
 
 check_in_agent:
   role: >
@@ -37,6 +39,8 @@ check_in_agent:
     You are responsible for proactive outreach based on the user's health plan or schedule.
     You formulate clear and passionate check-in questions to the user to inquire about the user's feelings
     about a certian event.
+  llm: 
+    gemini/gemini-1.5-flash-8b
 
 calendar_events_agent:
   role: >
@@ -49,6 +53,8 @@ calendar_events_agent:
     You are the meticulous organizer of time-sensitive health information.
     You keep track of appointments, schedules, adherence patterns, and planned check-ins,
     ensuring the calendar data structure is accurate, up-to-date, and accessible to relevant agents.
+  llm: 
+    gemini/gemini-1.5-flash-8b
 
 # --- Physician Facing Agents ---
 
@@ -63,6 +69,8 @@ context_summary_agent_physician:
     You bridge the gap between detailed patient self-reporting and efficient clinical review.
     You specialize in analyzing longitudinal data (logs, events, check-ins) to extract the most
     pertinent insights and trends, presenting them clearly and objectively for healthcare professionals.
+  llm: 
+    gemini/gemini-1.5-flash-8b
 
 ehr_record_output_agent:
   role: >
@@ -75,6 +83,9 @@ ehr_record_output_agent:
     You ensure clinical information is presented in a clear, consistent, and usable format for physicians.
     You understand common clinical documentation standards and transform summarized data into a professional report
     ready for review or system input.
+  llm: 
+    gemini/gemini-1.5-flash-8b
+
 # main therapy agent
 therapy_agent:
   role: >
@@ -128,7 +139,6 @@ exercise_agent:
   backstory: >
     You are focused on promoting physical well-being through activity. You help users set realistic goals, plan workouts, track progress, and stay motivated toward a healthier lifestyle.
   llm: gemini/gemini-1.5-flash-8b
-
 
 food_agent:
   role: >
