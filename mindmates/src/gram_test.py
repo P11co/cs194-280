@@ -7,6 +7,9 @@ from os import getenv
 from collections import defaultdict
 import json
 import re
+import os 
+
+print("CWD is:", os.getcwd())
 
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv(), override=True)
@@ -17,13 +20,11 @@ from aiogram.enums import ParseMode, ChatAction
 from aiogram.filters import CommandStart
 from aiogram.types import Message, ReactionTypeEmoji
 
-from google import genai # Keep if your filter uses it directly
+from google import genai
 
 # --- CrewAI Imports ---
 from crewai import Agent, Task, Crew, Process
-from mindmates.crew import Mindmates # Import your Crew class definition
-# Assuming your filter function is here or imported correctly
-# from mindmates.utils.llm_utils import filter_lifestyle_experts, call_llm # Example
+from mindmates.crew import Mindmates
 
 # --- Configuration ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', stream=sys.stdout)
@@ -173,14 +174,35 @@ async def handle_crewai_request(message: Message, bot: Bot):
             )
             expert_tasks.append(task)
             
-        from mindmates.utils.models import TherapyOutput # Adjust import path if needed
+        # RAG Context Retrieval
+        from mindmates.utils.embedding_utils import load_vectordb, fetch_rag_context
+        
+        input_query = f"Find me information relevant to {user_input}"
+        VECTOR_DB = load_vectordb()
+        rag_context = fetch_rag_context(input_query, VECTOR_DB, top_n=3)
+        print("RAG Context dump:", rag_context)
+            
+        from mindmates.utils.models import TherapyOutput
 
         synthesis_task = Task(
             description=f"""User Message Context:\n'''\n{formatted_history}\nUser: {user_input}\n'''\n\n
                         Review the user message context and the analyses from expert agents (if any).
-                        1. Synthesize perspectives into a supportive therapeutic text response for the user. Use emojis when appropriate. Try to mirror the way the user talks, so incorporate modern internet slang.
-                        2. Suggest ONE suitable **standard Unicode emoji** reaction from this specific, commonly allowed list: 👍, ❤️, 🔥, 🎉, 🤔, 🙏. If none of these fit well, suggest "None". Avoid custom or animated emojis. If no standard emoji feels appropriate, suggest "None".
+                        1. Synthesize perspectives into a supportive therapeutic text response for the user. Use emojis when appropriate. Try to mirror the way the user talks, so incorporate modern internet slang if the user uses it actively.
+                        2. Suggest ONE suitable **standard Unicode emoji** reaction from this specific, commonly allowed list: 👍, ❤️, 🔥, 🎉, 🤔, 🙏. 
+                        
+                        Here is what each of these emojis means:
+                        👍 Thumbs Up – agreement, approval or simple “got it”
+                        ❤️ Red Heart – warmth, affection, gratitude or strong support
+                        🔥 Fire – something “awesome,” impressive or “on fire”
+                        🎉 Party Popper – celebration, congratulations or festive cheer
+                        🤔 Thinking Face – pondering, curiosity, mild doubt or asking for clarification
+                        🙏 Folded Hands – thanks, please, hope or sincere support
+                        If no standard emoji feels appropriate, suggest "None".
+                        
                         Return ONLY the JSON object matching the expected schema, nothing else.
+                        
+                        Here are some relevant QNA pairs other patients have asked and how practitioners responded to them. Refer to them only if the context is relevant.
+                        {rag_context}
                         """,
             expected_output="A JSON object conforming to the TherapyOutput schema.", # Schema has final_response (str) and suggested_reaction (Optional[str])
             agent=therapy_agent_instance,
@@ -243,10 +265,6 @@ async def handle_crewai_request(message: Message, bot: Bot):
             # Try parsing the extracted string
             if json_string:
                 try:
-                    # Replace potentially incorrect assignments/quotes if needed (more advanced cleaning)
-                    # Example: Replace 'key="value"' with '"key": "value"' - this gets complex quickly
-                    # cleaned_json_string = json_string.replace("=", ":").replace("'", '"') # Oversimplified example!
-
                     output_data = json.loads(json_string) # Use loads() on the string
                     if not isinstance(output_data, dict):
                         logging.warning("Manual JSON parse result was not a dictionary.")
