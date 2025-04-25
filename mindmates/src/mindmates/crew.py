@@ -3,10 +3,10 @@ from crewai.project import CrewBase, agent, crew, task
 from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 import json
 
-file_path = '/home/vertex_ai_service_account.json' # modify it to the actual path of vertex ai service account credential file
-with open(file_path, 'r') as file:
-    vertex_credentials = json.load(file)
-vertex_credentials_json = json.dumps(vertex_credentials)
+# file_path = '/home/vertex_ai_service_account.json' # modify it to the actual path of vertex ai service account credential file
+# with open(file_path, 'r') as file:
+#     vertex_credentials = json.load(file)
+# vertex_credentials_json = json.dumps(vertex_credentials)
 
 VERBOSE = False
 
@@ -62,35 +62,13 @@ class Mindmates():
     @agent
     def checkInAgent(self) -> Agent:
         return Agent(
-            llm=LLM(
-                model="gemini/gemini-2.0-flash",
-                temperature=0.7,
-                vertex_credentials=vertex_credentials_json
-            ),
             config=self.agents_config['check_in_agent'],
             verbose=VERBOSE
         )
     
     @agent
-    def companionChatbotAgent(self) -> Agent:
-        return Agent(
-            llm=LLM(
-                model="gemini/gemini-2.0-flash",
-                temperature=0.7,
-                vertex_credentials=vertex_credentials_json
-            ),
-            config=self.agents_config['companion_chatbot_agent'],
-            verbose=VERBOSE,
-        )
-    
-    @agent
     def contextSummaryAgentPatient(self) -> Agent:
         return Agent(
-            llm=LLM(
-                model="gemini/gemini-2.0-flash",
-                temperature=0.7,
-                vertex_credentials=vertex_credentials_json
-            ),
             config=self.agents_config['context_summary_agent_patient'],
             verbose=VERBOSE
         )
@@ -98,13 +76,8 @@ class Mindmates():
     @agent
     def calendarEventsAgent(self) -> Agent:
         return Agent(
-            llm=LLM(
-                model="gemini/gemini-2.0-flash",
-                temperature=0.7,
-                vertex_credentials=vertex_credentials_json
-            ),
             config=self.agents_config['calendar_events_agent'],
-            verbose=VERBOSE,
+            verbose=VERBOSE
         )
         
     @task
@@ -148,7 +121,7 @@ class Mindmates():
         """Creates the chat crew"""
 
         return Crew(
-            agents=[self.companionChatbotAgent(), self.contextSummaryAgentPatient(), self.calendarEventsAgent()],
+            agents=[self.therapy_agent(), self.contextSummaryAgentPatient(), self.calendarEventsAgent()],
             tasks=[self.chatTask(), self.contextSummaryPatientTask(), self.calendarEventTask()],
             process=Process.sequential,
             verbose=VERBOSE

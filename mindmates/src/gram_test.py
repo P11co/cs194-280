@@ -32,13 +32,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 TOKEN = getenv("BOT_TOKEN")
 GEMINI_API_KEY = getenv("GEMINI_API_KEY")
 
-# Initialize Gemini Client (Example - adapt if filter uses a different client/LLM)
+# Initialize Gemini Client
 if not GEMINI_API_KEY:
     logging.error("GEMINI_API_KEY not found.")
     sys.exit("Gemini API Key is required.")
 else:
     try:
-        # This client might be used by your filter function
+        # This client will used by the filter function
         client = genai.Client(api_key=GEMINI_API_KEY)
         logging.info("Gemini configured successfully (for filter or direct calls).")
     except Exception as e:
@@ -48,7 +48,7 @@ else:
 dp = Dispatcher()
 
 # --- Simple In-Memory Chat History ---
-# Warning: This resets on bot restart. Use a database for persistence.
+# Warning: Use a database for persistence.
 chat_histories = defaultdict(list)
 MAX_HISTORY_LEN = 10 # Keep last 10 turns (User + Bot)
 
@@ -65,15 +65,12 @@ def get_formatted_history(chat_id):
     # Simple formatting example:
     return "\n".join([f"{msg['role']}: {msg['content']}" for msg in history])
 
-# --- Placeholder Filter Function (Replace with your actual implementation) ---
+# --- Filter Function ---
 async def filter_lifestyle_experts_async(chat_history: str, user_input: str, expert_list: list) -> list:
     """
-    Placeholder: Determines relevant experts based on input and history.
-    Replace this with your actual LLM call or logic.
     Returns a list of relevant expert TOPICS (e.g., ["work/study", "exercise"]).
     """
     logging.info("Filtering relevant experts...")
-    # Example simple keyword check (replace with LLM call)
     relevant_topics = []
     full_text = chat_history + "\nUser: " + user_input
     if "study" in full_text.lower() or "work" in full_text.lower():
@@ -86,20 +83,6 @@ async def filter_lifestyle_experts_async(chat_history: str, user_input: str, exp
         relevant_topics.append("hobby")
     if "food" in full_text.lower() or "eat" in full_text.lower() or "diet" in full_text.lower() or "nutrition" in full_text.lower():
         relevant_topics.append("food")
-
-    # --- Your actual LLM call would go here ---
-    # prompt = f"""Analyze the following conversation history and the latest user message.
-    # Determine which of these expert topics are relevant: {', '.join(expert_list)}.
-    # Respond ONLY with a comma-separated list of the relevant topics (e.g., work/study, exercise). If none are relevant, respond with 'None'.
-
-    # History:
-    # {chat_history}
-
-    # Latest User Message: {user_input}
-    # """
-    # response_text = await asyncio.to_thread(call_llm, prompt) # Assuming call_llm exists
-    # relevant_topics = [topic.strip() for topic in response_text.split(',') if topic.strip() and topic.strip().lower() != 'none']
-    # --- End LLM call section ---
 
     logging.info(f"Filter result: {relevant_topics}")
     return relevant_topics
