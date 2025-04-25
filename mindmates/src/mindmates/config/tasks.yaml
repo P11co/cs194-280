@@ -1,3 +1,72 @@
+check_in_task:
+  description: >
+    Here is the user's current calendar:
+
+    {calendar}
+
+    If the user's calendar is not empty and there exists a past event row with "[Empty]" left in the feedback column
+    of that row, ask the user how he/she feels about that event. Otherwise, just output a single 'None'.
+    
+    Note that the current time is {current_time}.
+  expected_output: >
+    A nice chat asking the user how the event was, or 'None'.
+  agent: checkInAgent
+
+chat_task:
+  description: >
+    Give a response to the user, with the following chat history provided.
+    
+    Note that the current time is {current_time}, and here is the user's current calendar (you
+    don't have to use it though):
+
+    {calendar}
+
+    Provided Chat History:
+
+    {chat_history}
+  expected_output: >
+    A friendly response to the user query.
+  agent: companionChatbotAgent
+
+context_summary_patient_task:
+  description: >
+    Review the context you get (which is the response from a chatbot to the user) along with the following attached
+    chat history, and generate a summary of the useful information given by the context and the last user query.
+    Make sure your summary contains any and all relevant information. Also, avoid unbiguous expressions of time, like
+    you should use specific dates and times instead of using words like "tomorrow".
+    
+    Note that the current time is {current_time}.
+
+    {chat_history}
+  expected_output: >
+    A summary of information provided only by the context chatbot response and the last user query.
+  agent: contextSummaryAgentPatient
+
+calendar_event_task:
+  description: >
+    Review the context you get along with the current user calendar:
+
+    {calendar}
+
+    You should:
+
+    (1) For each row in the current calendar, if the feedback of that event is "[Empty]" and the context contains
+    information about the user's feedback to that event, replace the "[Empty]" in that row with a concise description
+    of the feedback.
+
+    (2) For the upcoming event that appears in the context, create a new row in the calendar to describe that event.
+    You should fill in the "Feedback" part of that new row with "[Empty]".
+
+    Do not remove any rows from the current calendar.
+  expected_output: >
+    An updated version of user's calendar, where:
+
+    the first row should simply be "The User's Calendar:",
+
+    and each row from the second should consist of (1) "Time: {Time of the event}", (2) "Schedule: {A brief description of the
+    event}", and (3) "Feedback: {User's feedback, or [Empty]}".
+  agent: calendarEventsAgent
+
 research_task:
   description: >
     Conduct a thorough research about {topic}
@@ -6,12 +75,3 @@ research_task:
   expected_output: >
     A list with 10 bullet points of the most relevant information about {topic}
   agent: therapy_agent
-
-# reporting_task:
-#   description: >
-#     Review the context you got and expand each topic into a full section for a report.
-#     Make sure the report is detailed and contains any and all relevant information.
-#   expected_output: >
-#     A fully fledged report with the main topics, each with a full section of information.
-#     Formatted as markdown without '```'
-#   agent: reporting_analyst
