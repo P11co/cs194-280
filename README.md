@@ -9,7 +9,7 @@ Additionally, mental health AI systems lack integration with real-world clinical
 The lack of memory pool systems for context-aware engagement, proactive intervention strategies, and integration with clinical data highlights an urgent need for a holistic, innovative approach. To address this gap, we propose an AI system that combines domain-specific agents, persistent memory management, and EHR integration to enable proactive and personalized mental health care. However, implementing this solution raises challenges, such as preserving user privacy (e.g., compliance with HIPAA) and handling sensitive medical information securely.
 
 ## Installation
-conda create -n MindMates python=3.11
+conda create -n MindMates python=3.12
 
 Mac/Linux: curl -LsSf https://astral.sh/uv/install.sh | sh
 
