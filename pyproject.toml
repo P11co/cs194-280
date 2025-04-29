@@ -1,0 +1,23 @@
+[project]
+name = "MindMates"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Peter Park",email = "noreply@yourdomain.com"},
+    {name = "Hankun Li", email = "noreply@yourdomain.com"},
+    {name = "Evan Sandoval", email="noreply@yourdomain.com"},
+    {name = "Yueyue Hu", email="noreply@yourdomain.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11.11,<3.13"
+dependencies = [
+    "google-genai (>=1.12.1,<2.0.0)",
+    "aiogram (>=3.20.0.post0,<4.0.0)",
+    "python-dotenv (>=1.1.0,<2.0.0)",
+    "crewai (==0.117.1)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

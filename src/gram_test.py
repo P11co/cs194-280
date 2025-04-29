@@ -98,7 +98,7 @@ async def command_start_handler(message: Message) -> None:
     chat_id = message.chat.id
     chat_histories[chat_id] = [] # Clear history on /start
     await message.answer(f"Hello, {html.bold(message.from_user.full_name)}! I'm here to listen. Tell me what's on your mind.")
-    add_to_history(chat_id, "Bot", f"Hello, {message.from_user.full_name}! I'm here to listen. Tell me what's on your mind.")
+    # add_to_history(chat_id, "Bot", f"Hello, {message.from_user.full_name}! I'm here to listen. Tell me what's on your mind.")
 
 
 @dp.message(F.text)
@@ -174,13 +174,26 @@ async def handle_crewai_request(message: Message, bot: Bot):
                         2. Suggest ONE suitable **standard Unicode emoji** reaction from this specific, commonly allowed list: 👍, ❤️, 🔥, 🎉, 🤔, 🙏. 
                         
                         Here is what each of these emojis means:
-                        👍 Thumbs Up – agreement, approval or simple “got it”
-                        ❤️ Red Heart – warmth, affection, gratitude or strong support
-                        🔥 Fire – something “awesome,” impressive or “on fire”
-                        🎉 Party Popper – celebration, congratulations or festive cheer
-                        🤔 Thinking Face – pondering, curiosity, mild doubt or asking for clarification
-                        🙏 Folded Hands – thanks, please, hope or sincere support
+                        Thumbs up 👍
+                        Thumbs down 👎
+                        Red heart ❤️
+                        Fire 🔥
+                        Smiling face with 3 hearts 🥰
+                        Clap 👏
+                        Big smile 😁
+                        Thinking face 🤔
+                        Exploding head 🤯
+                        Face screaming in fear 😱
+                        Abusing face 🤬
+                        Crying face 😢
+                        Party popper 🎉
+                        Star-struck 🤩
+                        Vomiting face 🤮
+                        Poop emoji 💩
+                        Praying/Namaste emoji 🙏
                         If no standard emoji feels appropriate, suggest "None".
+                        
+                        3. Try not to be too repetitive (i.e. do not say things you have already mentioned in previous responses as it will become boring to read for the patient. if needed, try to be as concise as possible.)
                         
                         Return ONLY the JSON object matching the expected schema, nothing else.
                         
