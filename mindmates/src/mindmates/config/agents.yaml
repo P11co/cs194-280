@@ -28,7 +28,8 @@ context_summary_agent_patient:
     and logs to create timely and relevant summaries that provide necessary context for other agents
     (like Calendar/Events) and maintain a coherent record in the Diary Log.
   llm: 
-    gemini/gemini-1.5-flash-8b
+    # gemini/gemini-1.5-flash-8b
+    gemini/gemini-2.0-flash
 
 check_in_agent:
   role: >
@@ -40,7 +41,8 @@ check_in_agent:
     You formulate clear and passionate check-in questions to the user to inquire about the user's feelings
     about a certian event.
   llm: 
-    gemini/gemini-1.5-flash-8b
+    # gemini/gemini-1.5-flash-8b
+    gemini/gemini-2.0-flash
 
 calendar_events_agent:
   role: >
@@ -54,7 +56,8 @@ calendar_events_agent:
     You keep track of appointments, schedules, adherence patterns, and planned check-ins,
     ensuring the calendar data structure is accurate, up-to-date, and accessible to relevant agents.
   llm: 
-    gemini/gemini-1.5-flash-8b
+    # gemini/gemini-1.5-flash-8b
+    gemini/gemini-2.0-flash
 
 # --- Physician Facing Agents ---
 
@@ -70,7 +73,8 @@ context_summary_agent_physician:
     You specialize in analyzing longitudinal data (logs, events, check-ins) to extract the most
     pertinent insights and trends, presenting them clearly and objectively for healthcare professionals.
   llm: 
-    gemini/gemini-1.5-flash-8b
+    # gemini/gemini-1.5-flash-8b
+    gemini/gemini-2.0-flash
 
 ehr_record_output_agent:
   role: >
@@ -84,7 +88,8 @@ ehr_record_output_agent:
     You understand common clinical documentation standards and transform summarized data into a professional report
     ready for review or system input.
   llm: 
-    gemini/gemini-1.5-flash-8b
+    # gemini/gemini-1.5-flash-8b
+    gemini/gemini-2.0-flash
 
 # main therapy agent
 therapy_agent:
@@ -94,7 +99,8 @@ therapy_agent:
     Provide supportive, evidence-based therapeutic conversations
   backstory: >
     Trained on therapy dialogues, and skilled in CBT and motivational interviewing
-  llm: gemini/gemini-1.5-flash-8b
+  # llm: gemini/gemini-1.5-flash-8b
+  llm: gemini/gemini-2.0-flash
   memory: true
   verbose: true
 
@@ -111,7 +117,8 @@ work_study_agent:
     Engage the user in conversations specifically about their work, studies, or occupation; understand related struggles, stressors, and achievements; provide detailed feedback and actionable steps for building good long-term habits.
   backstory: >
     You are both a specialist in professional/academic life and a psychologist on work ethics. You help users articulate and reflect on their experiences, challenges, and goals in these areas, recognizing their impact on overall well-being and distilling best practices into clear advice.
-  llm: gemini/gemini-1.5-flash-8b
+  # llm: gemini/gemini-1.5-flash-8b
+  llm: gemini/gemini-2.0-flash
 
 relationship_agent:
   role: >
@@ -120,7 +127,8 @@ relationship_agent:
     Facilitate discussions about the user’s family, friends, social life, or romantic relationships; explore social support systems or conflicts; and offer guidance on communication skills, conflict navigation, and strengthening connections.
   backstory: >
     You are a psychologist specializing in relationships, social dynamics, and emotional intelligence. You create a safe space for users to explore their connections and help them build healthy, supportive bonds.
-  llm: gemini/gemini-1.5-flash-8b
+  # llm: gemini/gemini-1.5-flash-8b
+  llm: gemini/gemini-2.0-flash
 
 hobby_entertainment_agent:
   role: >
@@ -129,7 +137,8 @@ hobby_entertainment_agent:
     Discuss, track, and encourage engagement in hobbies, creative pursuits, and entertainment; understand their role in relaxation and enjoyment; and suggest activities that align with user interests to boost mood and life balance.
   backstory: >
     You are enthusiastic about leisure, personal interests, and positive psychology. You help users discover and maintain enjoyable activities that reduce stress and improve overall well-being.
-  llm: gemini/gemini-1.5-flash-8b
+  # llm: gemini/gemini-1.5-flash-8b
+  llm: gemini/gemini-2.0-flash
 
 exercise_agent:
   role: >
@@ -138,7 +147,8 @@ exercise_agent:
     Discuss, track, and assist in planning the user’s physical activities and exercise routines; understand barriers and successes; and provide tailored advice and motivation whenever exercise topics come up.
   backstory: >
     You are focused on promoting physical well-being through activity. You help users set realistic goals, plan workouts, track progress, and stay motivated toward a healthier lifestyle.
-  llm: gemini/gemini-1.5-flash-8b
+  # llm: gemini/gemini-1.5-flash-8b
+  llm: gemini/gemini-2.0-flash
 
 food_agent:
   role: >
@@ -147,5 +157,6 @@ food_agent:
     Provide practical advice and support when the patient discusses eating habits, nutrition, or concerns about diet. Help the patient develop balanced eating patterns and address challenges related to food and health.
   backstory: >
     You are a nutrition specialist with experience in behavioral health. You offer evidence-based guidance on healthy eating and mindful nutrition, intervening only when the conversation involves food, diet, or related struggles.
-  llm: gemini/gemini-1.5-flash-8b
+  # llm: gemini/gemini-1.5-flash-8b
+  llm: gemini/gemini-2.0-flash
   

@@ -8,6 +8,8 @@ from collections import defaultdict
 import json
 import re
 import os 
+import time
+
 
 print("CWD is:", os.getcwd())
 
@@ -47,10 +49,16 @@ else:
 
 dp = Dispatcher()
 
+chat_id = None # global chat_id, used for bot check-in
+
 # --- Simple In-Memory Chat History ---
 # Warning: Use a database for persistence.
 chat_histories = defaultdict(list)
 MAX_HISTORY_LEN = 10 # Keep last 10 turns (User + Bot)
+
+
+has_checked_in = False # record whether check-in's already performed so we don't ask the question over and over again
+last_user_response_time = 0 # record the time that we've last heard from user
 
 def add_to_history(chat_id, role, content):
     """Adds a message to the chat history for a user."""
@@ -92,30 +100,53 @@ async def filter_lifestyle_experts_async(chat_history: str, user_input: str, exp
 mindmates_definitions = Mindmates()
 
 # --- Telegram Handlers ---
+# Modification 1: insert check-in logic
+# assume that the agent will step in and ask check-in questions when we haven't heard from user for some time (5 minutes)
+# ------------------------------
+async def notifier(bot: Bot):
+    await asyncio.sleep(10) # give the bot some time to fully start up (when first run)
+    global has_checked_in
+    global chat_id
+    global last_user_response_time
+    while True:
+        if not has_checked_in and time.time() - last_user_response_time >= 300:
+            from mindmates.utils.workflow_utils import perform_checkin
+            check_in_response = perform_checkin()
+            if check_in_response != "None":
+                await bot.send_message(chat_id, check_in_response)
+                add_to_history(chat_id, "Bot", check_in_response)
+            has_checked_in = True
+        await asyncio.sleep(60)
+# ------------------------------
+
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
     """ Handler for the /start command """
+    global chat_id
+    response = f"Hello, {html.bold(message.from_user.full_name)}! I'm here to listen. Tell me what's on your mind."
     chat_id = message.chat.id
     chat_histories[chat_id] = [] # Clear history on /start
-    await message.answer(f"Hello, {html.bold(message.from_user.full_name)}! I'm here to listen. Tell me what's on your mind.")
-    add_to_history(chat_id, "Bot", f"Hello, {message.from_user.full_name}! I'm here to listen. Tell me what's on your mind.")
+    await message.answer(response)
+    add_to_history(chat_id, "Bot", response)
 
 
 @dp.message(F.text)
 async def handle_crewai_request(message: Message, bot: Bot):
     """ Handles incoming text, filters experts, runs dynamic CrewAI crew, and replies. """
+    global has_checked_in
     user_input = message.text
     chat_id = message.chat.id
     message_id = message.message_id # <-- Get the ID of the user's message
+
     if not user_input:
         return
-
+    
     await bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
     await asyncio.sleep(1) # <-- ADD FOR TESTING ONLY - forces typing status for 1s
 
     # 1. Add user message to history
-    add_to_history(chat_id, "User", user_input)
     formatted_history = get_formatted_history(chat_id)
+    add_to_history(chat_id, "User", user_input)
 
     try:
         # 2. Filter Relevant Experts
@@ -156,7 +187,7 @@ async def handle_crewai_request(message: Message, bot: Bot):
                 # async_execution=True
             )
             expert_tasks.append(task)
-            
+
         # RAG Context Retrieval
         from mindmates.utils.embedding_utils import load_vectordb, fetch_rag_context
         
@@ -284,11 +315,26 @@ async def handle_crewai_request(message: Message, bot: Bot):
                 logging.info(f"Reacted with '{reaction_to_set}' to message {message_id}")
             except Exception as reaction_error:
                 logging.warning(f"Could not set suggested reaction '{reaction_to_set}': {reaction_error}")
+                
         # --- End Set Reaction ---
 
         # 8. Add bot response to history
         add_to_history(chat_id, "Bot", final_response_text)
         await message.answer(final_response_text)
+        
+        # Modification 2: insert context summary and calendar update logic
+        # right after each round of conversation
+        # ------------------------------
+        # update the time recording when the user last sent a message
+        # (so that when the channel is idle for some time, we can perform check-in)
+        global last_user_response_time
+        last_user_response_time = time.time()
+        # calendar update
+        from mindmates.utils.workflow_utils import perform_memory_update
+        current_history = get_formatted_history(chat_id)
+        perform_memory_update(current_history)
+        has_checked_in = False
+        # ------------------------------
 
     except Exception as e:
         print(GEMINI_API_KEY)
@@ -300,8 +346,10 @@ async def handle_crewai_request(message: Message, bot: Bot):
 # --- Main Execution ---
 async def main() -> None:
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    asyncio.create_task(notifier(bot))
     logging.info("Starting bot polling...")
     await dp.start_polling(bot, skip_updates=True) # skip_updates=False might be better during dev
+
 
 if __name__ == "__main__":
     if not TOKEN:
