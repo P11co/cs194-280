@@ -90,7 +90,7 @@ class Mindmates():
     def calendarEventTask(self) -> Task:
         return Task(
             config=self.tasks_config['calendar_event_task'],
-            output_file="./memory_pool/calendar.json",
+            output_file="./src/memory_pool/calendar.json",
         )
     
     @crew
@@ -107,12 +107,15 @@ class Mindmates():
     @crew
     def memory_update_Crew(self) -> Crew:
         """Creates the chat crew"""
-
+        
+        from src.mindmates.utils.models import CalendarEvent
+        
         return Crew(
             agents=[self.contextSummaryAgentPatient(), self.calendarEventsAgent()],
             tasks=[self.contextSummaryPatientTask(), self.calendarEventTask()],
             process=Process.sequential,
-            verbose=VERBOSE
+            verbose=VERBOSE,
+            output_pydantic=CalendarEvent
         )
 
     # --- Method to get specific agents by name ---

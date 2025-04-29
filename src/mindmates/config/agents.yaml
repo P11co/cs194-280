@@ -51,6 +51,7 @@ calendar_events_agent:
     Manage and maintain the user's calendar, focusing on health-related events (appointments,
     medication times, check-ins), integrate relevant context from summaries, and update the Calendar data structure.
     Provide scheduling context to the Check-in agent.
+    Output only the raw JSON. Do not include any code block markers or formatting-just the JSON
   backstory: >
     You are the meticulous organizer of time-sensitive health information.
     You keep track of appointments, schedules, adherence patterns, and planned check-ins,

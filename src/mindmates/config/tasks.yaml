@@ -43,11 +43,13 @@ calendar_event_task:
     (2) For the upcoming event that appears in the context, create a new row in the calendar to describe that event.
     You should fill in the "Feedback" part of that new row with "[Empty]". 
 
-    Do not remove any rows from the current calendar.
+    Do not remove any rows from the current calendar. 
+    Output only the raw JSON. Do not include any code block markers or formatting-just the JSON
   expected_output: >
     A json file that contains the updated version of user's calendar. It should be a list where each data point has three
     attributes: (1) "time: {Time of the event}", (2) "schedule: {A brief description of the event}", and
     (3) "feedback: {A brief descrpiton of the user's feedback, or [Empty]}".
+    Output only the raw JSON. Do not include any code block markers or formatting-just the JSON
   agent: calendarEventsAgent
 
 research_task:
