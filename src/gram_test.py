@@ -126,13 +126,8 @@ async def command_start_handler(message: Message) -> None:
     response = f"Hello, {html.bold(message.from_user.full_name)}! I'm here to listen. Tell me what's on your mind."
     chat_id = message.chat.id
     chat_histories[chat_id] = [] # Clear history on /start
-<<<<<<< HEAD
-    await message.answer(f"Hello, {html.bold(message.from_user.full_name)}! I'm here to listen. Tell me what's on your mind.")
-    # add_to_history(chat_id, "Bot", f"Hello, {message.from_user.full_name}! I'm here to listen. Tell me what's on your mind.")
-=======
     await message.answer(response)
     add_to_history(chat_id, "Bot", response)
->>>>>>> prototype
 
 
 @dp.message(F.text)
