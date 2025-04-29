@@ -1,3 +1,0 @@
-The User's Calendar:
-Time: 2025-04-18 20:00:00    Schedule: visit my grandma  Feedback: [Empty]
-Time: 2025-04-22 08:00:00    Schedule: go to the dentist  Feedback: [Empty]

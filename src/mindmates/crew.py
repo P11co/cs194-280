@@ -1,14 +1,8 @@
-from crewai import Agent, Crew, Process, Task, LLM
+from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 import json
 
-# file_path = '/home/vertex_ai_service_account.json' # modify it to the actual path of vertex ai service account credential file
-# with open(file_path, 'r') as file:
-#     vertex_credentials = json.load(file)
-# vertex_credentials_json = json.dumps(vertex_credentials)
-
-VERBOSE = False
+VERBOSE = True
 
 @CrewBase
 class Mindmates():
@@ -27,7 +21,7 @@ class Mindmates():
     @agent
     def workstudy_agent(self) -> Agent:
         return Agent(
-            config=self.agents_config['workstudy_agent'],
+            config=self.agents_config['work_study_agent'],
             verbose=True
         )
 
@@ -41,7 +35,7 @@ class Mindmates():
     @agent
     def hobby_agent(self) -> Agent: # Corrected name
         return Agent(
-            config=self.agents_config['hobby_agent'],
+            config=self.agents_config['hobby_entertainment_agent'],
             verbose=True
         )
 
@@ -85,12 +79,6 @@ class Mindmates():
         return Task(
             config=self.tasks_config['check_in_task'],
         )
-    
-    @task
-    def chatTask(self) -> Task:
-        return Task(
-            config=self.tasks_config['chat_task'],
-        )
 
     @task
     def contextSummaryPatientTask(self) -> Task:
@@ -102,11 +90,11 @@ class Mindmates():
     def calendarEventTask(self) -> Task:
         return Task(
             config=self.tasks_config['calendar_event_task'],
-            output_file="./knowledge/calendar.txt",
+            output_file="./memory_pool/calendar.json",
         )
     
     @crew
-    def checkInCrew(self) -> Crew:
+    def checkin_crew(self) -> Crew:
         """Creates the check-in crew"""
 
         return Crew(
@@ -117,12 +105,12 @@ class Mindmates():
         )
     
     @crew
-    def chatCrew(self) -> Crew:
+    def memory_update_Crew(self) -> Crew:
         """Creates the chat crew"""
 
         return Crew(
-            agents=[self.therapy_agent(), self.contextSummaryAgentPatient(), self.calendarEventsAgent()],
-            tasks=[self.chatTask(), self.contextSummaryPatientTask(), self.calendarEventTask()],
+            agents=[self.contextSummaryAgentPatient(), self.calendarEventsAgent()],
+            tasks=[self.contextSummaryPatientTask(), self.calendarEventTask()],
             process=Process.sequential,
             verbose=VERBOSE
         )
@@ -133,8 +121,14 @@ class Mindmates():
         """Retrieves an instantiated agent by its method name."""
         if hasattr(self, name):
             method = getattr(self, name)
-            if callable(method) and hasattr(method, '_is_crew_agent'): # Check if it's decorated
+            # TODO: looks like there is no `_is_crew_agent` attribute, but instead
+            # the `is_agent` attribute, and we don't need to pass in self?
+            '''
+            if callable(method) and hasattr(method, '_is_crew_agent'):
                  # Call the decorated method to get the Agent instance
                  # Pass self if the method requires it (which decorated methods do implicitly)
                 return method(self)
+            '''
+            if callable(method) and hasattr(method, 'is_agent'):
+                return method()
         return None
