@@ -3,7 +3,7 @@ from mindmates.crew import Mindmates
 import json
 import re
 
-CALENDAR_PATH="./src/memory_pool/calendar.json"
+CALENDAR_PATH="./memory_pool/calendar.json"
 
 def read_calendar(calendar_path):
     # load the JSON array

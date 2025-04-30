@@ -90,7 +90,7 @@ class Mindmates():
     def calendarEventTask(self) -> Task:
         return Task(
             config=self.tasks_config['calendar_event_task'],
-            output_file="./src/memory_pool/calendar.json",
+            output_file="./memory_pool/calendar.json",
         )
     
     @crew
