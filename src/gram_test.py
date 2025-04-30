@@ -113,6 +113,7 @@ async def notifier(bot: Bot):
             from mindmates.utils.workflow_utils import perform_checkin
             check_in_response = perform_checkin()
             if check_in_response != "None":
+                assert chat_id != None, "Telegram bot not started! Send /start to bot in telegram and re-run gram_test.py"
                 await bot.send_message(chat_id, check_in_response)
                 add_to_history(chat_id, "Bot", check_in_response)
             has_checked_in = True
@@ -350,7 +351,7 @@ async def handle_crewai_request(message: Message, bot: Bot):
         # ------------------------------
 
     except Exception as e:
-        print(GEMINI_API_KEY)
+        # print(GEMINI_API_KEY)
         print(load_dotenv(find_dotenv()), find_dotenv())
         logging.error(f"Error during CrewAI execution or Telegram response for chat {chat_id}: {e}", exc_info=True)
         await message.answer("Sorry, I encountered an internal error while processing your request with the AI crew.")
