@@ -23,6 +23,19 @@ Windows: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/instal
 
 `crewai install`
 
+Install Ollama https://ollama.com/download
+
+`ollama pull hf.co/CompendiumLabs/bge-base-en-v1.5-gguf`
+`ollama pull hf.co/bartowski/Llama-3.2-1B-Instruct-GGUF`
+
+Create a `.env` file in `src/`, and set `GEMINI_API_KEY` to your Gemini API Key
+
+In telegram: Create a new bot with @Botfather on telegram, and save the token as `BOT_TOKEN` in `src/.env`
+
 ## Running MindMates
+Run ollama
+
+In telegram, send `/start` to the bot you created
+
 (inside MindMates Conda environment)
 `python src/gram_test.py`
