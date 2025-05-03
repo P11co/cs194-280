@@ -9,33 +9,44 @@ Additionally, mental health AI systems lack integration with real-world clinical
 The lack of memory pool systems for context-aware engagement, proactive intervention strategies, and integration with clinical data highlights an urgent need for a holistic, innovative approach. To address this gap, we propose an AI system that combines domain-specific agents, persistent memory management, and EHR integration to enable proactive and personalized mental health care. However, implementing this solution raises challenges, such as preserving user privacy (e.g., compliance with HIPAA) and handling sensitive medical information securely.
 
 ## Installation
-`conda create -n MindMates python=3.12`
+1. Clone the Repository
 
-Mac/Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+`git clone https://github.com/P11co/cs194-280.git`
 
-Windows: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+`cd mindmates`
 
-`pip install -r requirements.txt`
+2. Set Up Poetry Environment
+bash
 
-`uv tool install crewai`
+`poetry env use python3.12`
 
-`cd mindmates/`
+`poetry install`
 
-`crewai install`
+3. Install CrewAI, used for the multi-agent framework implementation:
 
-Install Ollama https://ollama.com/download
+`poetry add "crewai<0.13,>=0.10" `
 
-`ollama pull hf.co/CompendiumLabs/bge-base-en-v1.5-gguf`
+4. Set Up Ollama Models
+
+Download the required models for local inference:
+
+`ollama pull hf.co/CompendiumLabs/bge-base-en-v1.5-gguf `
+
 `ollama pull hf.co/bartowski/Llama-3.2-1B-Instruct-GGUF`
 
-Create a `.env` file in `src/`, and set `GEMINI_API_KEY` to your Gemini API Key
+5. Configure Environment Variables
 
-In telegram: Create a new bot with @Botfather on telegram, and save the token as `BOT_TOKEN` in `src/.env`
+Create a .env file in the src/ directory with the following content:
+
+`GEMINI_API_KEY=replace_your_gemini_api_key_here`
+
+`BOT_TOKEN=replace_your_telegram_bot_token_here`
+
+To get your Telegram bot token, create a new bot with @BotFather on Telegram.
 
 ## Running MindMates
 Run ollama
 
 In telegram, send `/start` to the bot you created
 
-(inside MindMates Conda environment)
 `python src/gram_test.py`
