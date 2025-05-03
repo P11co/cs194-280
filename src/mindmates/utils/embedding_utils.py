@@ -5,12 +5,12 @@ LANGUAGE_MODEL = 'hf.co/bartowski/Llama-3.2-1B-Instruct-GGUF'
 
 def load_vectordb():
     VECTOR_DB = []
-    if os.path.exists("vector_db.pkl"):
-        with open("vector_db.pkl", "rb") as f:
+    if os.path.exists("./src/memory_pool/vector_db.pkl"):
+        with open("./src/memory_pool/vector_db.pkl", "rb") as f:
             VECTOR_DB = pickle.load(f)
         print(f"Loaded {len(VECTOR_DB)} embeddings from disk.")
     else:
-        print("NO SUCH VECTORDB FILE")
+        print("NO SUCH VECTORDB FILE... no retrieval occured!")
     return VECTOR_DB
 
 def cosine_similarity(a, b):
