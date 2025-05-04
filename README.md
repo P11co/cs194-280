@@ -13,10 +13,7 @@ The lack of memory pool systems for context-aware engagement, proactive interven
 
 `git clone https://github.com/P11co/cs194-280.git`
 
-`cd mindmates`
-
 2. Set Up Poetry Environment
-bash
 
 `poetry env use python3.12`
 
