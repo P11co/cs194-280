@@ -15,7 +15,7 @@ class Mindmates():
         return Agent(
             config=self.agents_config['therapy_agent'],
             verbose=True,
-            memory=True # Agent-level memory can be enabled here if needed
+            # memory=True # Agent-level memory can be enabled here if needed
         )
 
     @agent
@@ -59,18 +59,11 @@ class Mindmates():
             config=self.agents_config['check_in_agent'],
             verbose=VERBOSE
         )
-    
-    @agent
-    def contextSummaryAgentPatient(self) -> Agent:
-        return Agent(
-            config=self.agents_config['context_summary_agent_patient'],
-            verbose=VERBOSE
-        )
 
     @agent
-    def calendarEventsAgent(self) -> Agent:
+    def calendar_agent(self) -> Agent:
         return Agent(
-            config=self.agents_config['calendar_events_agent'],
+            config=self.agents_config['calendar_agent'],
             verbose=VERBOSE
         )
         
@@ -79,18 +72,12 @@ class Mindmates():
         return Task(
             config=self.tasks_config['check_in_task'],
         )
-
-    @task
-    def contextSummaryPatientTask(self) -> Task:
-        return Task(
-            config=self.tasks_config['context_summary_patient_task'],
-        )
     
     @task
-    def calendarEventTask(self) -> Task:
+    def calendar_event_task(self) -> Task:
         return Task(
             config=self.tasks_config['calendar_event_task'],
-            output_file="./memory_pool/calendar.json",
+            # output_file="./memory_pool/calendar.json",
         )
     
     @crew
@@ -108,17 +95,17 @@ class Mindmates():
     def memory_update_Crew(self) -> Crew:
         """Creates the chat crew"""
         
-        from src.mindmates.utils.models import CalendarEvent
+        from src.mindmates.utils.models import CalendarEvent, CalendarOutput
         
         return Crew(
-            agents=[self.contextSummaryAgentPatient(), self.calendarEventsAgent()],
-            tasks=[self.contextSummaryPatientTask(), self.calendarEventTask()],
+            agents=[self.calendar_agent()],
+            tasks=[self.calendar_event_task()],
             process=Process.sequential,
             verbose=VERBOSE,
-            output_pydantic=CalendarEvent
+            output_pydantic=CalendarOutput
         )
-
-    # --- Method to get specific agents by name ---
+        
+  # --- Method to get specific agents by name ---
     # This is useful for dynamically fetching agents in gram.py
     def get_agent_by_name(self, name: str) -> Agent | None:
         """Retrieves an instantiated agent by its method name."""

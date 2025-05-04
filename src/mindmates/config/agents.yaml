@@ -1,35 +1,16 @@
-# --- Patient Facing Agents ---
-
-# companion_chatbot_agent:
-#   role: >
-#     Empathetic Companion & Interaction Hub
-#   goal: >
-#     Engage the patient in supportive conversations, understand their needs,
-#     manage dialogue flow, and coordinate with specialized agents (Lifestyle, Context Summary)
-#     for information gathering and task execution.
-#   backstory: >
-#     You are a friendly, patient, and understanding AI companion designed to
-#     support users in managing their daily life and well-being, particularly focusing on
-#     their health journey. You listen attentively, delegate tasks efficiently to other
-#     specialized agents, and provide a consistent and reassuring point of interaction
-#     for the patient. You log key interaction details for later summary.
-
-# --- Patient-Side Data Processing Agents ---
-
-context_summary_agent_patient:
+# --- Communicating agents ---
+therapy_agent:
   role: >
-    Patient Interaction Synthesizer
+    Conversational Therapy Agent
   goal: >
-    Aggregate and summarize recent interactions, diary log entries, and lifestyle agent outputs
-    into a concise context relevant for ongoing patient conversations, check-ins, and
-    calendar/event management. Update the Diary Log data structure.
+    Provide supportive, evidence-based therapeutic conversations
   backstory: >
-    You excel at condensing information from various sources. You monitor patient interactions
-    and logs to create timely and relevant summaries that provide necessary context for other agents
-    (like Calendar/Events) and maintain a coherent record in the Diary Log.
-  llm: 
-    # gemini/gemini-1.5-flash-8b
-    gemini/gemini-2.0-flash
+    Trained on therapy dialogues, and skilled in CBT and motivational interviewing
+  # llm: gemini/gemini-1.5-flash-8b
+  llm: gemini/gemini-2.0-flash
+  # memory: true
+  verbose: true
+
 
 check_in_agent:
   role: >
@@ -44,35 +25,16 @@ check_in_agent:
     # gemini/gemini-1.5-flash-8b
     gemini/gemini-2.0-flash
 
-calendar_events_agent:
+# --- Data Processing Agents ---
+calendar_agent:
   role: >
-    Health Schedule & Event Manager
+    Health Schedule & Calendar Events Manager
   goal: >
-    Manage and maintain the user's calendar, focusing on health-related events (appointments,
-    medication times, check-ins), integrate relevant context from summaries, and update the Calendar data structure.
-    Provide scheduling context to the Check-in agent.
-    Output only the raw JSON. Do not include any code block markers or formatting-just the JSON
+    Manage and maintain the user's calendar, focusing on health-related events (appointments, medication times, check-ins), integrate relevant context from summaries, and update the Calendar data structure.
   backstory: >
     You are the meticulous organizer of time-sensitive health information.
     You keep track of appointments, schedules, adherence patterns, and planned check-ins,
     ensuring the calendar data structure is accurate, up-to-date, and accessible to relevant agents.
-  llm: 
-    # gemini/gemini-1.5-flash-8b
-    gemini/gemini-2.0-flash
-
-# --- Physician Facing Agents ---
-
-context_summary_agent_physician:
-  role: >
-    Clinical Data Synthesizer
-  goal: >
-    Consolidate and analyze patient-reported data from the Diary Log and Calendar/Events structures
-    to generate a concise, clinically relevant summary highlighting trends, key events, concerns,
-    and progress for physician review.
-  backstory: >
-    You bridge the gap between detailed patient self-reporting and efficient clinical review.
-    You specialize in analyzing longitudinal data (logs, events, check-ins) to extract the most
-    pertinent insights and trends, presenting them clearly and objectively for healthcare professionals.
   llm: 
     # gemini/gemini-1.5-flash-8b
     gemini/gemini-2.0-flash
@@ -92,20 +54,7 @@ ehr_record_output_agent:
     # gemini/gemini-1.5-flash-8b
     gemini/gemini-2.0-flash
 
-# main therapy agent
-therapy_agent:
-  role: >
-    Conversational Therapy Agent
-  goal: >
-    Provide supportive, evidence-based therapeutic conversations
-  backstory: >
-    Trained on therapy dialogues, and skilled in CBT and motivational interviewing
-  # llm: gemini/gemini-1.5-flash-8b
-  llm: gemini/gemini-2.0-flash
-  memory: true
-  verbose: true
-
-# lifestyle agents
+# --- Lifestyle Agents ---
 # 1. work, study, occupation agent
 # 2. relationship agent
 # 3. hobby/entertainment agent

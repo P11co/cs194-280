@@ -1,7 +1,7 @@
 # ./src/mindmates/utils/models.py
-
 from pydantic import BaseModel, Field
 from typing import Optional
+from typing import List
 
 class TherapyOutput(BaseModel):
     final_response: str = Field(description="The final text response for the user.")
@@ -11,3 +11,6 @@ class CalendarEvent(BaseModel):
     time: str = Field(description="Time of the event")
     schedule: str = Field(description="A brief description of the event")
     feedback: str = Field(description="A brief description of the when to remind the user, or [Empty]")
+    
+class CalendarOutput(BaseModel):
+    events: List[CalendarEvent]

@@ -12,51 +12,23 @@ check_in_task:
     A nice chat asking the user how the event was, or 'None'.
   agent: checkInAgent
 
-context_summary_patient_task:
-  description: >
-    Review the context you get (which is the response from a chatbot to the user) along with the following attached
-    chat history, and generate a summary of the useful information given by the context and the last user query.
-    Make sure your summary contains any and all relevant information. Also, avoid unbiguous expressions of time, instead
-    you should use specific dates and times instead of using words like "tomorrow".
-    
-    Note that the current time is {current_time}.
-
-    {chat_history}
-  expected_output: >
-    A summary of information provided only by the context chatbot response and the last user query.
-  agent: contextSummaryAgentPatient
-
 calendar_event_task:
   description: >
-    Review the context you get along with the current user calendar:
-
-    The User's Calendar:
-
-    {calendar}
-
     You should:
-
     (1) For each row in the current calendar, if the feedback of that event is "[Empty]" and the context contains
     information about the user's feedback to that event, replace the "[Empty]" in that row with a concise description
     of the feedback.
+    (2) For any upcoming event that appears in the context, create a new row in the calendar with ABSOLUTE DATES:
+       - Convert relative time references (like "next Sunday") to actual calendar dates (like "2025-05-11")
+       - If the user mentions "next Sunday", calculate the exact date based on today's date ({current_time})
+       - Use YYYY-MM-DD format for all dates
+    (3) For the Schedule, mention what is about to happen. Summarize what the user plans to do in one sentence
 
-    (2) For the upcoming event that appears in the context, create a new row in the calendar to describe that event.
-    You should fill in the "Feedback" part of that new row with "[Empty]". 
-
-    Do not remove any rows from the current calendar. 
-    Output only the raw JSON. Do not include any code block markers or formatting-just the JSON
+    CONTEXT: {chat_history}
+    Today's date is: {current_time}
+    The current calendar is: {calendar}
+    You should fill in the "Feedback" part of that new row with "[Empty]".
+    Do not remove any rows from the current calendar unless that event has been rescheduled or cancelled.
   expected_output: >
-    A json file that contains the updated version of user's calendar. It should be a list where each data point has three
-    attributes: (1) "time: {Time of the event}", (2) "schedule: {A brief description of the event}", and
-    (3) "feedback: {A brief descrpiton of the user's feedback, or [Empty]}".
-    Output only the raw JSON. Do not include any code block markers or formatting-just the JSON
-  agent: calendarEventsAgent
-
-research_task:
-  description: >
-    Conduct a thorough research about {topic}
-    Make sure you find any interesting and relevant information given
-    the current year is {current_year}.
-  expected_output: >
-    A list with 10 bullet points of the most relevant information about {topic}
-  agent: therapy_agent
+    A raw JSON list containing objects with 'Time', 'Schedule', and 'Feedback' keys. Do not include markdown style. Never use "```"" or "json" in the output.
+  agent: calendar_agent
