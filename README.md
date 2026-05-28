@@ -1,6 +1,11 @@
 # cs194-280
 
 Welcome to MindMates
+
+[Our Paper](https://docs.google.com/document/d/1Oi1jfGHCWGP1kzAfFVqukbNbxQr5ijKjUYYWEwPnMYI/edit?usp=sharing)
+
+[Our Poster](https://drive.google.com/file/d/12XWubpD0n7m8XUJPuoXrX9QytUaZebnb/view?usp=sharing)
+
 ## Problem Statement
 Despite significant advancements in AI-driven mental health solutions, existing systems remain limited in their approach to long-term, personalized patient care. Most current systems focus solely on providing instant responses, primarily relying on datasets of mental health counseling conversations fine-tuned for large language models. Critically, these systems do not collect or retain a patient’s contextual or longitudinal data, failing to address the long-term complexities of mental health care.
 
@@ -47,3 +52,6 @@ Run ollama
 In telegram, send `/start` to the bot you created
 
 `python src/gram_test.py`
+
+## Acknowledgement 
+We are grateful to Prof. Serina Chang for her valuable feedback and guidance in shaping this project. We also thank Prof. Reza Abbassi and Rahul Biswas for their continued support and contributions to bring future versions of this project into the industry.
